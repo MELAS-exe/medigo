@@ -38,7 +38,7 @@ class _CustomButtonState extends State<CustomButton> {
     } else if (widget.text != null) {
       return Text(
         widget.text!,
-        style: Theme.of(context).textTheme.titleMedium!.copyWith(color: Theme.of(context).colorScheme.onPrimary,),
+        style: Theme.of(context).textTheme.bodyLarge!.copyWith(color: Theme.of(context).colorScheme.onPrimary, fontWeight: FontWeight.bold),
       );
     } else {
       return const SizedBox.shrink(); // Return an empty widget if no content is provided

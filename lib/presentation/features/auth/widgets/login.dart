@@ -72,7 +72,7 @@ class _LoginState extends State<Login> {
               child: Text(
                 "Inscrivez vous?",
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.secondary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
             ),

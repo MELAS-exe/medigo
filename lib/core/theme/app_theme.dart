@@ -10,7 +10,7 @@ class AppTheme {
       primaryColor: const Color(0xFF27C44B), // Soft highlight green
       colorScheme: const ColorScheme.light(
         primary: Color(0xFFB6E9C9),       // Mint green for buttons
-        secondary: Color(0xFF27C44B),     // Highlight
+        secondary: Color(0xFFE4B8B9),     // Highlight
         surface: Color(0xFFFFFFFF),       // Replaces background
         onPrimary: Colors.black,
         onSecondary: Colors.white,
