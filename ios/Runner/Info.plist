@@ -45,5 +45,16 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+    <!-- Camera permissions -->
+    <key>NSCameraUsageDescription</key>
+    <string>Cette application a besoin d'accéder à votre caméra pour scanner les ordonnances et identifier les médicaments.</string>
+
+    <!-- Photo library permissions -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Cette application a besoin d'accéder à votre galerie photo pour sauvegarder et récupérer les images d'ordonnances.</string>
+
+    <!-- Photo library add-only permission (iOS 11+) -->
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Cette application a besoin d'accéder à votre galerie photo pour sauvegarder les images d'ordonnances.</string>
 </dict>
 </plist>

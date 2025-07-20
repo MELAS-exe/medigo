@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:medigo/presentation/features/home/screens/home.dart';
 import 'package:medigo/presentation/features/map/screens/map_screen.dart';
-import 'package:medigo/presentation/features/health/screens/health_screen.dart';
+import 'package:medigo/presentation/features/health/screens/consultation_screen.dart';
 import 'package:medigo/presentation/features/solidarity/screens/solidarity_screen.dart';
 
 class Navigation extends StatefulWidget {
@@ -16,7 +16,7 @@ class _NavigationState extends State<Navigation> {
   final List<Widget> _pages = [
     Home(),
     MapScreen(),
-    HealthScreen(),
+    ConsultationScreen(),
     SolidarityScreen(),
   ];
 

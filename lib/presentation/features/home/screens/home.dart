@@ -131,12 +131,12 @@ class Home extends StatelessWidget {
                           children: [
                             GestureDetector(
                               onTap : (){
-                                // Navigator.push(
-                                //   context,
-                                //   MaterialPageRoute(
-                                //     builder: (context) => CameraScreen(),
-                                //   ),
-                                // );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CameraScreen(),
+                                  ),
+                                );
                               },
                               child: Container(
                                 width: 60,
