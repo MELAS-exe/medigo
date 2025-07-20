@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class PrescriptionApiService {
-  static const String baseUrl = 'http://192.168.1.12:8000/api'; // Replace with your actual IP
+  static const String baseUrl = 'http://192.168.1.124:8000/api'; // Replace with your actual IP
 
   static Future<PrescriptionResponse> uploadPrescription(String imagePath) async {
     try {

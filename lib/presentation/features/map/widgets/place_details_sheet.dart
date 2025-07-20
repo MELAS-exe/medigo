@@ -1,9 +1,10 @@
+// File: lib/presentation/features/map/widgets/place_details_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:medigo/core/theme/spacing.dart';
 
-import '../../../shared/widgets/CustomTextField.dart';
+import '../screens/drug_search_results_screen.dart';
 
-class PlaceDetailsSheet extends StatelessWidget {
+class PlaceDetailsSheet extends StatefulWidget {
   final Map<String, dynamic> place;
   final VoidCallback onClose;
   final VoidCallback onGetDirections;
@@ -18,8 +19,26 @@ class PlaceDetailsSheet extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _PlaceDetailsSheetState createState() => _PlaceDetailsSheetState();
+}
+
+class _PlaceDetailsSheetState extends State<PlaceDetailsSheet> {
+  final TextEditingController _searchController = TextEditingController();
+
+  void _searchMedication(String query) {
+    if (query.trim().isEmpty) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DrugSearchResultsScreen(searchQuery: query),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isPharmacy = place['type'] == 'pharmacy';
+    final isPharmacy = widget.place['type'] == 'pharmacy';
 
     return FractionallySizedBox(
       widthFactor: 0.9,
@@ -83,7 +102,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                               Column(
                                 children: [
                                   Text(
-                                    place['name'],
+                                    widget.place['name'],
                                     overflow: TextOverflow.ellipsis,
                                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                       fontWeight: FontWeight.bold,
@@ -99,7 +118,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                                           Icon(Icons.access_time, size: 16, color: Theme.of(context).colorScheme.onSurface),
                                           SizedBox(width: 4),
                                           Text(
-                                            place['hours'],
+                                            widget.place['hours'],
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                               color: Theme.of(context).colorScheme.onSurface,
                                             ),
@@ -113,7 +132,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                                           Icon(Icons.phone, size: 16, color: Theme.of(context).colorScheme.onSurface),
                                           SizedBox(width: 4),
                                           Text(
-                                            place['phone'],
+                                            widget.place['phone'],
                                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                                               color: Theme.of(context).colorScheme.onSurface,
                                             ),
@@ -131,10 +150,12 @@ class PlaceDetailsSheet extends StatelessWidget {
                                 children: [
                                   Icon(Icons.location_on, color: Theme.of(context).colorScheme.onSurface, size: 20),
                                   SizedBox(width: AppSpacing.space8(context)),
-                                  Text(
-                                    place['address'],
-                                    style: Theme.of(context).textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
+                                  Expanded(
+                                    child: Text(
+                                      widget.place['address'],
+                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -145,7 +166,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                         Align(
                           alignment: Alignment.topRight,
                           child: GestureDetector(
-                            onTap: onClose,
+                            onTap: widget.onClose,
                             child: Container(
                               margin: EdgeInsets.all(16),
                               padding: EdgeInsets.all(8),
@@ -160,7 +181,6 @@ class PlaceDetailsSheet extends StatelessWidget {
                       ],
                     ),
 
-
                     SizedBox(height: AppSpacing.space16(context)),
 
                     // Action buttons
@@ -168,7 +188,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                       children: [
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: onCall,
+                            onPressed: widget.onCall,
                             icon: Icon(Icons.phone),
                             label: Text('Appeler'),
                             style: ElevatedButton.styleFrom(
@@ -184,7 +204,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                         SizedBox(width: AppSpacing.space16(context)),
                         Expanded(
                           child: ElevatedButton.icon(
-                            onPressed: onGetDirections,
+                            onPressed: widget.onGetDirections,
                             icon: Icon(Icons.directions),
                             label: Text('Itinéraire'),
                             style: ElevatedButton.styleFrom(
@@ -202,27 +222,46 @@ class PlaceDetailsSheet extends StatelessWidget {
 
                     SizedBox(height: AppSpacing.space32(context)),
 
+                    // Search bar for medications
                     Row(
                       children: [
                         Expanded(
                           child: Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.onSecondary,
-                                borderRadius: BorderRadius.circular(30),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.onSecondary,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              onSubmitted: _searchMedication,
+                              decoration: InputDecoration(
+                                hintText: "Chercher un médicament...",
+                                hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  color: Theme.of(context).focusColor,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(100.0),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                               ),
-                              child: CustomTextField(hintText: "Opticien")),
+                            ),
+                          ),
                         ),
                         SizedBox(width: AppSpacing.space8(context)),
-                        Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.primary,
-                            borderRadius: BorderRadius.circular(100),
-                          ),
-                          child: Icon(
-                            Icons.search,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            size: 24,
+                        GestureDetector(
+                          onTap: () => _searchMedication(_searchController.text),
+                          child: Container(
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.primary,
+                              borderRadius: BorderRadius.circular(100),
+                            ),
+                            child: Icon(
+                              Icons.search,
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              size: 24,
+                            ),
                           ),
                         ),
                       ],
@@ -230,37 +269,102 @@ class PlaceDetailsSheet extends StatelessWidget {
 
                     SizedBox(height: AppSpacing.space32(context)),
 
-                    // Services/Medications
-                    if (isPharmacy && place['medications'] != null) ...[
-                      Text(
-                        'Médicaments disponibles',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: AppSpacing.space16(context)),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: (place['medications'] as List<String>).map((med) =>
+                    // Services/Medications with stock status
+                    if (isPharmacy && widget.place['medications'] != null) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'En stock',
+                            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          if (widget.place['hasStock'] == true)
                             Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                               decoration: BoxDecoration(
-                                border: Border.all(color: Theme.of(context).colorScheme.onSurface),
-                                borderRadius: BorderRadius.circular(16),
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(12),
                               ),
                               child: Text(
-                                med,
+                                "Disponible",
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onSurface,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
-                        ).toList(),
+                        ],
                       ),
-                    ] else if (!isPharmacy && place['services'] != null) ...[
+                      SizedBox(height: AppSpacing.space16(context)),
+
+                      // Display medications in grid format
+                      GridView.builder(
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 3,
+                        ),
+                        itemCount: (widget.place['medications'] as List<String>).length,
+                        itemBuilder: (context, index) {
+                          final med = (widget.place['medications'] as List<String>)[index];
+                          // Simulate stock status based on medication name
+                          bool inStock = med.hashCode % 3 != 0; // Random stock status
+
+                          return Container(
+                            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: inStock ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+                              border: Border.all(
+                                color: inStock ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+                              ),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.medication,
+                                  size: 14,
+                                  color: inStock ? Colors.green : Colors.red,
+                                ),
+                                SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    med,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onSurface,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: inStock ? Colors.green : Colors.red,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    inStock ? "✓" : "✗",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 8,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ] else if (!isPharmacy && widget.place['services'] != null) ...[
                       Text(
                         'Services disponibles',
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -271,7 +375,7 @@ class PlaceDetailsSheet extends StatelessWidget {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: (place['services'] as List<String>).map((service) =>
+                        children: (widget.place['services'] as List<String>).map((service) =>
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                               decoration: BoxDecoration(
@@ -292,8 +396,6 @@ class PlaceDetailsSheet extends StatelessWidget {
                     ],
 
                     SizedBox(height: AppSpacing.space32(context)),
-
-                    SizedBox(height: AppSpacing.space32(context)),
                   ],
                 ),
               ),
@@ -302,5 +404,11 @@ class PlaceDetailsSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 }

@@ -14,6 +14,7 @@ void main() {
       ],
       child: Builder(
         builder: (context) => MaterialApp(
+          debugShowCheckedModeBanner: false,
           theme: AppTheme.build(context),
           home: AuthScreen(),
         ),

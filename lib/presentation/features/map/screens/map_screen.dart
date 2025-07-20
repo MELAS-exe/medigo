@@ -1,8 +1,12 @@
+// File: lib/presentation/features/map/screens/map_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:medigo/core/theme/spacing.dart';
 import 'package:medigo/presentation/features/map/widgets/place_details_sheet.dart';
+import 'package:medigo/service/drug_search_service.dart';
+
+import 'drug_search_results_screen.dart';
 
 class MapScreen extends StatefulWidget {
   @override
@@ -11,6 +15,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   final MapController _mapController = MapController();
+  final TextEditingController _searchController = TextEditingController();
 
   // Dakar coordinates (user's location)
   final LatLng _dakarCenter = LatLng(14.6937, -17.4441);
@@ -18,6 +23,8 @@ class _MapScreenState extends State<MapScreen> {
   String _selectedFilter = 'all'; // all, hospital, pharmacy
   bool _showBottomSheet = false;
   Map<String, dynamic>? _selectedPlace;
+  List<String> _searchSuggestions = [];
+  bool _showSuggestions = false;
 
   // Sample data for pharmacies and hospitals in Dakar
   final List<Map<String, dynamic>> _places = [
@@ -73,48 +80,6 @@ class _MapScreenState extends State<MapScreen> {
       'phone': '77 321 54 87',
       'hasStock': false,
       'medications': ['Aspirine', 'Ibuprofène'],
-    },
-    {
-      'id': '6',
-      'name': 'COTAS (Centre Ophtalmologique)',
-      'type': 'hospital',
-      'location': LatLng(14.6977, -17.4411),
-      'address': 'Rue de Thiong, Dakar',
-      'hours': '8h-17h',
-      'phone': '33 654 32 10',
-      'services': ['Ophtalmologie', 'Chirurgie oculaire'],
-    },
-    {
-      'id': '7',
-      'name': 'Pharmacie Le Fogny',
-      'type': 'pharmacy',
-      'location': LatLng(14.6867, -17.4511),
-      'address': 'Quartier Le Fogny, Dakar',
-      'hours': '9h-18h',
-      'phone': '77 147 85 96',
-      'hasStock': true,
-      'medications': ['Vitamines', 'Antiseptiques'],
-    },
-    {
-      'id': '8',
-      'name': 'Pharmacie Sophie Samb',
-      'type': 'pharmacy',
-      'location': LatLng(14.6997, -17.4391),
-      'address': 'Caty F DIOP, Dakar',
-      'hours': '8h-20h',
-      'phone': '77 258 14 73',
-      'hasStock': true,
-      'medications': ['Antibiotiques', 'Antalgiques'],
-    },
-    {
-      'id': '9',
-      'name': 'Clinique Cheikh Sidaty',
-      'type': 'hospital',
-      'location': LatLng(14.6847, -17.4521),
-      'address': 'Avenue Thierry, Dakar',
-      'hours': '24h/24',
-      'phone': '33 789 45 62',
-      'services': ['Médecine générale', 'Radiologie'],
     },
   ];
 
@@ -234,7 +199,6 @@ class _MapScreenState extends State<MapScreen> {
                     ),
                     SizedBox(height: AppSpacing.space16(context)),
                     Row(
-
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildFilterButton(
@@ -367,7 +331,7 @@ class _MapScreenState extends State<MapScreen> {
     setState(() {
       if (filter == 'search') {
         _selectedFilter = 'all';
-        _showSearchDialog();
+        _showSearchBottomSheet();
       } else {
         _selectedFilter = _selectedFilter == filter ? 'all' : filter;
       }
@@ -375,35 +339,152 @@ class _MapScreenState extends State<MapScreen> {
     });
   }
 
-  void _showSearchDialog() {
-    showDialog(
+  void _showSearchBottomSheet() {
+    showModalBottomSheet(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Rechercher'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Nom du lieu ou médicament...',
-                border: OutlineInputBorder(),
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              // Handle bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
-          ],
+
+              SizedBox(height: AppSpacing.space16(context)),
+
+              Text(
+                "Rechercher un médicament",
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              SizedBox(height: AppSpacing.space16(context)),
+
+              // Search field with suggestions
+              Column(
+                children: [
+                  TextField(
+                    controller: _searchController,
+                    onChanged: _onSearchChanged,
+                    onSubmitted: _performSearch,
+                    decoration: InputDecoration(
+                      hintText: "Ex: Doliprane, Paracétamol...",
+                      prefixIcon: Icon(Icons.search),
+                      suffixIcon: _searchController.text.isNotEmpty
+                          ? IconButton(
+                        icon: Icon(Icons.clear),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {
+                            _searchSuggestions = [];
+                            _showSuggestions = false;
+                          });
+                        },
+                      )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+
+                  // Suggestions list
+                  if (_showSuggestions && _searchSuggestions.isNotEmpty)
+                    Container(
+                      margin: EdgeInsets.only(top: 8),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Column(
+                        children: _searchSuggestions.map((suggestion) {
+                          return ListTile(
+                            leading: Icon(Icons.medication, size: 20),
+                            title: Text(suggestion.toUpperCase()),
+                            onTap: () {
+                              _searchController.text = suggestion;
+                              setState(() {
+                                _showSuggestions = false;
+                              });
+                              _performSearch(suggestion);
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                ],
+              ),
+
+              SizedBox(height: AppSpacing.space16(context)),
+
+              ElevatedButton(
+                onPressed: () => _performSearch(_searchController.text),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  minimumSize: Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  "Rechercher",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('Annuler'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // Implement search logic
-            },
-            child: Text('Rechercher'),
-          ),
-        ],
+      ),
+    );
+  }
+
+  void _onSearchChanged(String query) async {
+    if (query.length >= 2) {
+      try {
+        final suggestions = await DrugSearchService.getMedicationSuggestions(query);
+        setState(() {
+          _searchSuggestions = suggestions;
+          _showSuggestions = true;
+        });
+      } catch (e) {
+        // Handle error silently for suggestions
+      }
+    } else {
+      setState(() {
+        _searchSuggestions = [];
+        _showSuggestions = false;
+      });
+    }
+  }
+
+  void _performSearch(String query) {
+    if (query.trim().isEmpty) return;
+
+    Navigator.pop(context); // Close bottom sheet
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DrugSearchResultsScreen(searchQuery: query),
       ),
     );
   }
@@ -429,6 +510,7 @@ class _MapScreenState extends State<MapScreen> {
   @override
   void dispose() {
     _mapController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 }
