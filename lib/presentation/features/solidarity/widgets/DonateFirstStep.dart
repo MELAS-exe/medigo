@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:medigo/presentation/features/camera/screens/camera_screen.dart';
 
 import '../../../../core/theme/spacing.dart';
 import '../../../shared/widgets/custom_button.dart';
@@ -33,7 +34,9 @@ class _DonateFirstStepState extends State<DonateFirstStep> {
               width: double.infinity,
               onTap: () {
                 Navigator.pop(context);
-                // Add scanner functionality
+                Navigator.push(context, MaterialPageRoute(builder: (context){
+                  return CameraScreen();
+                }));
               },
             ),
             SizedBox(height: AppSpacing.space16(context)),

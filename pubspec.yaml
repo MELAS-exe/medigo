@@ -17,6 +17,7 @@ dependencies:
   chat_bubbles: ^1.7.0
   image_picker: ^1.0.7
   cupertino_icons: ^1.0.8
+  http: ^1.1.0
 
 dev_dependencies:
   flutter_test:

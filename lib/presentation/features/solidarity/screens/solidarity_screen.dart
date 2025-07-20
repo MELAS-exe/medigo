@@ -16,6 +16,33 @@ class SolidarityScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        "assets/logo-medigo.png",
+                        height: 36,
+                        errorBuilder:
+                            (context, error, stackTrace) => Icon(
+                          Icons.medical_services,
+                          size: 48,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                      SizedBox(width: AppSpacing.space16(context)),
+                      Text(
+                        "Medigo",
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                  GestureDetector(child: Icon(Icons.menu, size: 24)),
+                ],
+              ),
+
+              SizedBox(height: AppSpacing.space32(context)),
               // Header card
               Container(
                 width: double.infinity,

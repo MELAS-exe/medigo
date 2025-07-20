@@ -191,7 +191,7 @@ class _MapScreenState extends State<MapScreen> {
               right: 20,
               child: Text(
                 'Pousser pour naviguer',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
                 textAlign: TextAlign.center,
